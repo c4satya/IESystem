@@ -13,9 +13,16 @@ from sklearn.ensemble import RandomForestRegressor  # Mock ML
 import hashlib 
 from datetime import datetime
 import os
+from appFunctions import search_hs_code , fallback_hs_classifier,is_valid_hs
+import re
  # Mock HS classifier
 
 # Mock data simulating integrations (DGFT/IEC, ICEGATE, RBI, WTO, OFAC, PCS, ECGC)
+if 'results' not in st.session_state:
+    st.session_state.results = {}
+
+if 'analysis_complete' not in st.session_state:
+    st.session_state.analysis_complete = False
 MOCK_HS_DATA = {
     'textiles': '5208.12', 'spices': '0904.11', 'electronics': '8517.62', 'software': '8523.49'
 }
@@ -30,18 +37,9 @@ def mock_kg_query(hs, country):
     duty = MOCK_DUTIES.get(country, 0.06)
     return {'licenses': licenses, 'duties': duty, 'restricted': 'china' in country.lower()}
 
-# HS Classification AI (BERT-like hash + keyword matcher)
-@st.cache_data
-def classify_hs(product_desc):
-    if any(word in product_desc.lower() for word in ['cloth', 'fabric', 'textile']):
-        return '5208.12'
-    if any(word in product_desc.lower() for word in ['spice', 'turmeric', 'pepper']):
-        return '0904.11'
-    if any(word in product_desc.lower() for word in ['phone', 'laptop', 'electronic']):
-        return '8517.62'
-    # Fallback hash-based
-    hash_obj = hashlib.md5(product_desc.lower().encode())
-    return hash_obj.hexdigest()[:6]
+
+
+
 
 # Time Predictor (XGBoost/RandomForest mock trained on hist data)
 @st.cache_data
@@ -56,15 +54,30 @@ def predict_time(hs, country, qty, port='Mumbai'):
     return max(15, int(model.predict(X)[0]))
 
 # Risk Engine (Random Forest scoring)
-def risk_score(product, country, hs):
-    score = 25  # Base
-    if any(risk_word in product.lower() for risk_word in ['weapon', 'dual-use', 'restricted']):
+def risk_score(product: str, country: str, hs: str = None) -> int:
+    """Robust risk scoring - handles None hs safely"""
+    score = 25  # Base risk
+    
+    # Safe string checks
+    product = product or ""
+    country = country or ""
+    
+    # Product risk keywords
+    risk_keywords = ['weapon', 'dual-use', 'restricted', 'nuclear', 'chemical', 'explosive']
+    if any(keyword in product.lower() for keyword in risk_keywords):
         score += 40
-    if 'china' in country.lower() or 'russia' in country.lower():
-        score += 25  # Sanctions mock
-    if len(hs) != 6:
-        score += 10  # Invalid HS
-    return min(100, score)
+    
+    # Country sanctions risk
+    high_risk_countries = ['china', 'russia', 'north korea', 'iran', 'syria']
+    if any(c in country.lower() for c in high_risk_countries):
+        score += 25
+    
+    # HS code validation (safe)
+    if hs:
+        if not re.match(r'^\d{4}(?:\.\d{2})?\d{0,4}$', str(hs)) or len(str(hs).replace('.', '')) < 4:
+            score += 15  # Invalid HS penalty
+    
+    return min(100, max(0, score)) 
 
 # Compliance Validator (Mock DGFT/ICEGATE/RBI/OFAC)
 def compliance_check(hs, country, iec='mock123'):
@@ -234,14 +247,7 @@ with col1b:
         placeholder="e.g., 100% cotton crew neck T-shirt size M, or Organic turmeric powder 500g packs", 
         help="**Detailed specs** for AI HS classification & compliance"
     )
-# with col2:
-#     country = st.selectbox("Destination Country", ["USA", "EU", "China", "Singapore", "UK", "UAE"])
 
-# with col2:
-    
-#     qty = st.number_input("Quantity (units)", min_value=1, value=1000, help="Affects costs/time")
-#     unit_type = st.selectbox("Unit Type", list(units_options.keys()), index=0)
-#     unit_price = st.number_input("Unit Price (₹)", min_value=0.1, value=10.0)    
 with col3:
     
     country = st.selectbox("Destination Country", ["USA", "EU", "China", "Singapore", "UK"])
@@ -263,22 +269,45 @@ with col3:
 
 
 if st.button("🚀 Run Full Analysis", type="primary", use_container_width=True):
-    is_valid, message = validate_inputs(product_name.strip(), product_desc.strip(), country, qty, unit_type)
-    if not is_valid:
-        st.error(message)
-        st.stop()
+    # Validation...
     
-    full_product = f"{product_name}: {product_desc}"
-    with st.spinner("🔄 Processing..."):
-        hs = classify_hs(full_product)  
-        compliance = compliance_check(hs, country)
-        costs = estimate_costs(qty, country, unit_type, unit_price)
-        time_days = predict_time(hs, country, qty)
-        risk = risk_score(full_product, country, hs)
+    if not st.session_state.results:
+        st.session_state.results = {}    
+    
+    with st.spinner("🔍 HS → Compliance → Risk → Costs..."):
+        full_product = f"{product_name}: {product_desc}"
+    
+    # HS with fallback
+    hs_result = search_hs_code(full_product)
+    hs_code = hs_result[0] if hs_result else None
+    hs_explanation = hs_result[1] if hs_result else "No HS found"
+    
+    if not hs_code:
+        st.header("HS CODE FOUND\n"+hs_code+" : "+hs_explanation)
+
+    else:    
+        st.warning("⚠️ Using fallback analysis (no HS code)")
+        hs_code = "N/A"
+    
+    # Safe calls - pass None-safe values
+    compliance = compliance_check(hs_code, country)
+    costs = estimate_costs(qty, country, unit_type, unit_price)
+    time_days = predict_time(hs_code, country, qty)
+    risk = risk_score(full_product, country, hs_code)  
+    
+    # Store results
+    st.session_state.results = {
+        'hs': hs_code,
+        'hs_explanation': hs_explanation,
+        'compliance': compliance,
+        'costs': costs,
+        'time_days': time_days,
+        'risk': risk
+    }
         
         # Cache results
-        st.session_state.results = {
-            'hs': hs, 'compliance': compliance, 'costs': costs,
+    st.session_state.results = {
+            'hs': hs_code, 'compliance': compliance, 'costs': costs,
             'time_days': time_days, 'risk': risk
         }
 
