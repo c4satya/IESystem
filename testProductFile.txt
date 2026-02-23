@@ -1,0 +1,47 @@
+?? 1?? Textile Products
+Product Name: Men’s Cotton T-Shirt
+Description: 100% cotton knitted T-shirt, short sleeve, round neck, for adults
+?? Key words: cotton, knitted, garment, men
+
+Product Name: Polyester Woven Fabric
+Description: 100% polyester woven fabric, dyed, used for garments
+?? Key words: polyester, woven, fabric
+
+?? 2?? Electronics
+Product Name: Smartphone
+Description: Touchscreen mobile phone with 5G connectivity and rechargeable lithium battery
+?? Key words: mobile phone, communication device
+
+Product Name: LED Television
+Description: 42-inch LED smart TV with WiFi connectivity
+?? Key words: television receiver, LED
+
+?? 3?? Food Products
+Product Name: Basmati Rice
+Description: Long-grain aromatic rice, polished, packed in 25kg bags
+?? Key words: rice, basmati, semi/fully milled
+
+Product Name: Refined Sunflower Oil
+Description: Edible refined sunflower oil, packed in 1-liter plastic bottles
+?? Key words: vegetable oil, refined
+
+?? 4?? Machinery
+Product Name: Centrifugal Water Pump
+Description: Electric motor-driven centrifugal pump for water circulation
+?? Key words: pump, liquid handling
+
+?? 5?? Chemicals
+Product Name: Sodium Hypochlorite Solution
+Description: Industrial-grade bleaching chemical solution (10–15% concentration)
+?? Key words: chemical compound, disinfectant
+
+?? 6?? Plastic Products
+Product Name: Plastic Storage Container
+Description: Household polypropylene storage box with lid
+?? Key words: plastic article, household item
+
+?? 7?? Metal Products
+Product Name: Stainless Steel Kitchen Knife
+Description: Stainless steel blade kitchen knife with plastic handle
+?? Key words: cutlery, stainless steel
+

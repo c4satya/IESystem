@@ -1,0 +1,18 @@
+# streamlit run app.py
+
+streamlit
+reportlab
+pandas
+numpy
+scikit-learn
+joblib
+python-dotenv
+beautifulsoup4
+requests
+lxml
+pypdf 
+sentence-transformers
+pinecone
+langchain
+google-generativeai
+PyPDF2
