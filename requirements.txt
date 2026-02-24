@@ -20,5 +20,5 @@ pypdf
 sentence-transformers
 pinecone
 langchain
-google-generativeai=0.8.5
+google-generativeai==0.8.5
 PyPDF2

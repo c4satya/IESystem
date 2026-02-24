@@ -9,11 +9,11 @@ import io
 import json
 from datetime import datetime
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor  # Mock ML
+from sklearn.ensemble import RandomForestRegressor 
 import hashlib 
 from datetime import datetime
 import os
-from appFunctions import search_hs_code , fallback_hs_classifier,is_valid_hs
+from appFunctions import * 
 import re
  # Mock HS classifier
 
@@ -278,8 +278,8 @@ if st.button("🚀 Run Full Analysis", type="primary", use_container_width=True)
         full_product = f"{product_name}: {product_desc}"
     
     # HS with fallback
-    hs_result = search_hs_code(full_product)
-    hs_code = hs_result[0] if hs_result else None
+    hs_result = search_hs_code(product_name,product_desc)
+    hs_code = hs_result if hs_result else None
     hs_explanation = hs_result[1] if hs_result else "No HS found"
     
     if not hs_code:
