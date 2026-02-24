@@ -1,12 +1,24 @@
 # streamlit run app.py
 
-streamlit==1.38.0
-reportlab==4.2.2
-pandas==2.2.2
-numpy==1.26.4
 scikit-learn
-joblib==1.4.2
-python-dotenv==1.0.1
+joblib
+
 beautifulsoup4
 requests
 lxml
+streamlit
+reportlab
+pandas
+numpy
+scikit-learn
+joblib
+python-dotenv
+beautifulsoup4
+requests
+lxml
+pypdf 
+sentence-transformers
+pinecone
+langchain
+google-generativeai=0.8.5
+PyPDF2
