@@ -29,8 +29,8 @@ from typing import Tuple, Optional
 
 load_dotenv()
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-GEMINI_API_KEY=os.getenv("GEMINI_API_KEY")
-retriever = HSCodeRetriever(GEMINI_API_KEY+"",PINECONE_API_KEY+"","pdf-embeddings")
+# GEMINI_API_KEY=os.getenv("GEMINI_API_KEY")
+retriever = HSCodeRetriever(PINECONE_API_KEY+"","pdf-embeddings-768")
 
 
 
@@ -77,16 +77,13 @@ def search_hs_code(product_name: str,product_description:str):
     Real web search HS classifier - scrapes DGFT/Trade portals
     Returns: (hs_code, explanation/confidence)
     """
-    st.info("🔍 Searching HS codes from Vector Database ...")
+    # st.info("🔍 Searching HS codes from Vector Database ...")
             
     # Search queries (DGFT first, fallback global)
-    search_query = f"HS code for {product_name} and having description {product_description}"
-    # Clean query for search
-    query = re.sub(r'[^\w\s]', ' ', search_query.lower()).strip()
+    # search_query = f"HS code for {product_name} and having description {product_description}"
+    
     results = retriever.fetch_hs_code(product_name=product_name,product_description=product_description)
-    st.info(f"HS_Code:{results["hs_code"]} and description: {results["product_desc"]}")
+    # st.info(f"HS_Code:{results["hs_code"]} and description: {results["product_desc"]}")
     return results
-
-
 ans=search_hs_code("Makrana White Marble"," A world-renowned, pure white, high-calcite marble with long-lasting quality, ideal for premium flooring and luxury, classic architectural projects.")
 print(ans)

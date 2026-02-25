@@ -1,4 +1,6 @@
 # streamlit run app.py
+# run virtual env: >vnev\Scripts\activate.bat  
+
 
 scikit-learn
 joblib

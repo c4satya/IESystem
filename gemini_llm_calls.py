@@ -4,16 +4,20 @@ import os
 import re
 import json
 from Embeding import *
-load_dotenv()
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+# load_dotenv()
+
+# GEMINI_API_KEY = "AIzaSyD7TeAVbKHOpJsNURIc64H8VBX0pFQGF6s"
+
+
 
 # Configure Gemini
-genai.configure(api_key=GEMINI_API_KEY)
+
 
 def get_best_hs_code(user_query: str, vector_results):
-   """ Returns the most accurate 8-digit HS code and description based on vector DB semantic search results.
-    """
+   GEMINI_API_KEY = "AIzaSyD7TeAVbKHOpJsNURIc64H8VBX0pFQGF6s"
+   genai.configure(api_key=GEMINI_API_KEY)
+   
    formatted_chunks = []
    if isinstance(vector_results[0], str):
     # vector_results are raw strings
@@ -50,13 +54,8 @@ EXAMPLE OUTPUT:
 
    model = genai.GenerativeModel("gemini-3-flash-preview")
    response = model.generate_content(prompt)
-   result_dict = parse_json_from_response(response) 
+   
 
-   return result_dict
+   return response.text
+def compliances_for_product(hs_code)
 
-def parse_json_from_response(llm_text: str) -> dict:
-    # Extract JSON from response.text
-    json_match = re.search(r'\{.*\}', llm_text, re.DOTALL)
-    if json_match:
-        return json.loads(json_match.group())
-    raise ValueError("No valid JSON found")
