@@ -1,6 +1,8 @@
 import google.generativeai as genai
 from dotenv import load_dotenv
 import os
+import re
+import json
 from Embeding import *
 load_dotenv()
 
@@ -9,46 +11,52 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 # Configure Gemini
 genai.configure(api_key=GEMINI_API_KEY)
 
-def get_best_hs_code(user_query: str, vector_results: list) -> str:
+def get_best_hs_code(user_query: str, vector_results):
+   """ Returns the most accurate 8-digit HS code and description based on vector DB semantic search results.
     """
-    Returns the most accurate 8-digit HS code based on vector DB semantic search results.If hs code correct for given name and description provide hs code based on your knowledge
-
-    :param user_query: Original product search query from user that contain product name and product description
-    :param vector_results: List of dicts -> [{"hs_code": "xxxx", "description": "...","score":decimal value which repesent similarity,higher the value represents higher match with user query expected outcome}]
-    :return: A list that contian two values: 1. 8-digit HS Code string, 2. product_desc string
+   formatted_chunks = []
+   if isinstance(vector_results[0], str):
+    # vector_results are raw strings
+    formatted_chunks = [f"Chunk:\n{chunk}\n" for chunk in vector_results]
+   else:
+    # vector_results are dicts with metadata
+        formatted_chunks = [f"Chunk {result['id']}:\n{result['metadata']['text']}\n" for result in vector_results]
     
-    """
+   prompt = f"""You are a customs tariff classification expert with 20+ years experience.
 
-    context = "\n".join(
-        [f"HS Code: {item['hs_code']} | Description: {item['description']} | Score: {item['score']}"
-         for item in vector_results]
-    )
+USER QUERY: "{user_query}"
 
-    prompt = f"""
-You are a customs classification expert.
+TOP VECTOR MATCHES (raw export data):
+{formatted_chunks}
 
-User Product Query:
-"{user_query}"
+RULES:
+1. Parse each chunk using this format:
+   - After \\n → 4 digits = SEQ NO
+   - Next 8 digits = HS CODE  
+   - Next text until numbers = DESCRIPTION
+   - Ignore all trailing metrics/numbers
 
-Below are the most relevant HS code matches retrieved from a vector database:
+2. From all valid 8-digit HS codes found, select EXACTLY ONE best match for the user query
+3. Use your HS code knowledge to validate/correct if needed
+4. Write a clean, professional product description (max 80 chars)
 
-{context}
+OUTPUT JSON ONLY - NO OTHER TEXT:
+{{"hs_code": "XXXXXXXX", "product_desc": "Clean description here"}}
 
-Task:
-- Select the single best matching HS code.
-- Return the 8-digit HS code and redifine a proper description based on description of selected hs code.
-- Do NOT provide any explanation.
-- Strictly follow the output format.
-
-Output format:
-[XXXXXXXX,product_desc]
-
-output:defination
-XXXXXXXX:hs_code
-product_desc:redefine hs code description
+EXAMPLE OUTPUT:
+{{"hs_code": "68022310", "product_desc": "Polished granite blocks/tiles"}}
 """
+    
 
-    model = genai.GenerativeModel("gemini-3-flash-preview")
-    response = model.generate_content(prompt)
+   model = genai.GenerativeModel("gemini-3-flash-preview")
+   response = model.generate_content(prompt)
+   result_dict = parse_json_from_response(response) 
 
-    return response
+   return result_dict
+
+def parse_json_from_response(llm_text: str) -> dict:
+    # Extract JSON from response.text
+    json_match = re.search(r'\{.*\}', llm_text, re.DOTALL)
+    if json_match:
+        return json.loads(json_match.group())
+    raise ValueError("No valid JSON found")

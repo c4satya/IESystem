@@ -84,6 +84,7 @@ def search_hs_code(product_name: str,product_description:str):
     # Clean query for search
     query = re.sub(r'[^\w\s]', ' ', search_query.lower()).strip()
     results = retriever.fetch_hs_code(product_name=product_name,product_description=product_description)
+    st.info(f"HS_Code:{results["hs_code"]} and description: {results["product_desc"]}")
     return results
 
 
