@@ -57,5 +57,5 @@ EXAMPLE OUTPUT:
    
 
    return response.text
-def compliances_for_product(hs_code)
+
 

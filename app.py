@@ -279,15 +279,15 @@ if st.button("🚀 Run Full Analysis", type="primary", use_container_width=True)
     
     # HS with fallback
     hs_result = search_hs_code(product_name,product_desc)
-    hs_code = hs_result if hs_result else None
-    hs_explanation = hs_result[1] if hs_result else "No HS found"
+    # hs_code = hs_result if hs_result else None
+    # hs_explanation = hs_result[1] if hs_result else "No HS found"
     
-    if not hs_code:
-        st.header("HS CODE FOUND\n"+hs_code+" : "+hs_explanation)
+    if not hs_result:
+        st.header("HS CODE FOUND\n"+hs_result["hs_code"]+" : "+hs_result["product_desc"])
 
-    else:    
-        st.warning("⚠️ Using fallback analysis (no HS code)")
-        hs_code = "N/A"
+    # else:    
+    #     st.warning("⚠️ Using fallback analysis (no HS code)")
+    #     hs_code = "N/A"
     
     # Safe calls - pass None-safe values
     compliance = compliance_check(hs_code, country)
