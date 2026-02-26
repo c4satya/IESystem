@@ -1,5 +1,11 @@
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List
+import json
+import os
+import logging
+from typing import List
+from dotenv import load_dotenv
+import google.generativeai as genai
 
 
 class CostBreakdown(BaseModel):
@@ -34,18 +40,10 @@ class ExportEstimationLLMResult(BaseModel):
     time_breakdown: TimeBreakdown
     risk_factors: List[RiskFactor]
 
-import json
-import os
-import logging
-from typing import List
-from dotenv import load_dotenv
-import google.generativeai as genai
+
 
 # Import your existing BestExportRoute model
 # from export_route_module import BestExportRoute
-
-load_dotenv()
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 logger = logging.getLogger("ai_estimation_engine")
 
@@ -55,7 +53,11 @@ class AIExportEstimationEngine:
     Gemini-powered AI estimation & risk prediction engine.
     """
 
-    def __init__(self, model_name: str = "gemini-1.5-flash"):
+    def __init__(self, model_name: str = "gemini-3-flash-preview"):
+        load_dotenv()
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+        
         self.model = genai.GenerativeModel(model_name)
 
     def estimate(
@@ -66,7 +68,7 @@ class AIExportEstimationEngine:
         product_type: str,
         quantity: int,
         export_country: str,
-        compliances: List[str],
+        compliances,
         route
     ) -> ExportEstimationLLMResult:
 
@@ -109,6 +111,10 @@ class AIExportEstimationEngine:
     ) -> str:
 
         schema = ExportEstimationLLMResult.model_json_schema()
+        if hasattr(route, "model_dump_json"):
+            route_json = route.model_dump_json(indent=2)
+        else:
+            route_json = json.dumps(route, indent=2) if isinstance(route, dict) else str(route)
 
         return f"""
 You are a SENIOR EXPORT COST & RISK ANALYST based in Mumbai, India.
@@ -124,7 +130,7 @@ Quantity: {quantity}
 Destination Country: {export_country}
 
 Export Route:
-{route.model_dump_json(indent=2)}
+    {route_json}
 
 Compliance List:
 {compliances}
@@ -164,7 +170,7 @@ result = estimator.estimate(
     quantity=1000,
     export_country="United States",
     compliances=["IEC", "GST", "Commercial Invoice", "Packing List"],
-    route=null
+    route="Mumbai Factory → JNPT Nhava Sheva → Port of New York → US Inland Warehouse"
 )
 
 print(result.model_dump_json(indent=2))
