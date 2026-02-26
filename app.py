@@ -15,6 +15,9 @@ from datetime import datetime
 import os
 from appFunctions import * 
 import re
+
+from export_complinaces import compliance_pipeline
+from route_analysis import ExportRouteAnalyzer
  # Mock HS classifier
 
 # Mock data simulating integrations (DGFT/IEC, ICEGATE, RBI, WTO, OFAC, PCS, ECGC)
@@ -31,8 +34,11 @@ MOCK_DUTIES = {'USA': 0.05, 'EU': 0.08, 'China': 0.10, 'Singapore': 0.00}
 MOCK_INCENTIVES = ['RoDTEP 4%', 'NIRYAT PROTSAHAN 2.75%', 'ECGC Insurance Eligible']
 MOCK_PORT_CONGESTION = {'Mumbai': 2, 'Chennai': 3}  # Days delay
 
+
 # Mock Knowledge Graph query (Neo4j sim: Product → HS → Country → Regs)
+category=""
 def mock_kg_query(hs, country):
+    compliance_result=compliance_pipeline(hs_code,country,product_name,product_desc)
     licenses = MOCK_LICENSES.get(hs, ['IEC'])
     duty = MOCK_DUTIES.get(country, 0.06)
     return {'licenses': licenses, 'duties': duty, 'restricted': 'china' in country.lower()}
@@ -41,47 +47,18 @@ def mock_kg_query(hs, country):
 
 
 
-# Time Predictor (XGBoost/RandomForest mock trained on hist data)
+
 @st.cache_data
 def predict_time(hs, country, qty, port='Mumbai'):
-    np.random.seed(hash(hs + country) % 42)
-    X = np.array([[len(hs), len(country), np.log(qty + 1), MOCK_PORT_CONGESTION.get(port, 2)]]).reshape(1, -1)
-    # Mock fitted model
-    y_mock = np.random.randint(20, 40, 10)
-    X_mock = np.random.rand(10, 4)
-    model = RandomForestRegressor(n_estimators=50, random_state=42)
-    model.fit(X_mock, y_mock)
-    return max(15, int(model.predict(X)[0]))
+    
 
 # Risk Engine (Random Forest scoring)
 def risk_score(product: str, country: str, hs: str = None) -> int:
-    """Robust risk scoring - handles None hs safely"""
-    score = 25  # Base risk
-    
-    # Safe string checks
-    product = product or ""
-    country = country or ""
-    
-    # Product risk keywords
-    risk_keywords = ['weapon', 'dual-use', 'restricted', 'nuclear', 'chemical', 'explosive']
-    if any(keyword in product.lower() for keyword in risk_keywords):
-        score += 40
-    
-    # Country sanctions risk
-    high_risk_countries = ['china', 'russia', 'north korea', 'iran', 'syria']
-    if any(c in country.lower() for c in high_risk_countries):
-        score += 25
-    
-    # HS code validation (safe)
-    if hs:
-        if not re.match(r'^\d{4}(?:\.\d{2})?\d{0,4}$', str(hs)) or len(str(hs).replace('.', '')) < 4:
-            score += 15  # Invalid HS penalty
-    
-    return min(100, max(0, score)) 
-
+    risk_S=
+    return    
 # Compliance Validator (Mock DGFT/ICEGATE/RBI/OFAC)
 def compliance_check(hs, country, iec='mock123'):
-    kg = mock_kg_query(hs, country)
+    kg = ""
     issues = []
     if 'china' in country.lower():
         issues.append("Sanctions check: High risk (OFAC mock)")
@@ -252,10 +229,6 @@ with col3:
     
     country = st.selectbox("Destination Country", ["USA", "EU", "China", "Singapore", "UK"])
 
-# with col2:
-#     country = st.selectbox("Destination Country", ["USA", "EU", "China", "Singapore", "UK"])
-#     qty = st.number_input("Quantity (units)", min_value=1, value=1000, help="Affects costs/time")
-#     unit_price = st.number_input("Unit Price (₹)", min_value=0.1, value=10.0)    
 
 col1, col2,col3 = st.columns([1, 1, 1])
 with col1:
@@ -274,35 +247,34 @@ if st.button("🚀 Run Full Analysis", type="primary", use_container_width=True)
     if not st.session_state.results:
         st.session_state.results = {}    
     
-    with st.spinner("🔍 HS → Compliance → Risk → Costs..."):
-        full_product = f"{product_name}: {product_desc}"
-    
-    # HS with fallback
+    st.spinner("🔍 HS → Compliance → Route → Costs → Time →...")
     hs_result = search_hs_code(product_name,product_desc)
-    # hs_code = hs_result if hs_result else None
-    # hs_explanation = hs_result[1] if hs_result else "No HS found"
-    
-    if not hs_result:
+    hs_code= hs_result["hs_code"]
+    if hs_result:
         st.header("HS CODE FOUND\n"+hs_result["hs_code"]+" : "+hs_result["product_desc"])
 
-    # else:    
-    #     st.warning("⚠️ Using fallback analysis (no HS code)")
-    #     hs_code = "N/A"
+    
     
     # Safe calls - pass None-safe values
-    compliance = compliance_check(hs_code, country)
-    costs = estimate_costs(qty, country, unit_type, unit_price)
-    time_days = predict_time(hs_code, country, qty)
-    risk = risk_score(full_product, country, hs_code)  
+    compliance = compliance_pipeline(hs_code,country,product_name,product_desc)
+    
+    category=compliance["category"]
+    
+    analyzerR = ExportRouteAnalyzer()
+    route = analyzerR.get_best_route(product_name,category,hs_code,quantity,export_country)
+    cost=estimate_costs(qty, country, unit_type, unit_price)
+    
+    # time_days = predict_time(hs_code, country, qty)
+    # risk = risk_score(full_product, country, hs_code)  
     
     # Store results
     st.session_state.results = {
         'hs': hs_code,
-        'hs_explanation': hs_explanation,
+        'product_desc': hs_result["product_desc"],
         'compliance': compliance,
-        'costs': costs,
-        'time_days': time_days,
-        'risk': risk
+        'costs': 0,
+        'time_days': 0,
+        'risk': "20%"
     }
         
         # Cache results

@@ -1,5 +1,5 @@
 ?? 1?? Textile Products
-Product Name: Men’s Cotton T-Shirt
+Product Name: Menï¿½s Cotton T-Shirt
 Description: 100% cotton knitted T-shirt, short sleeve, round neck, for adults
 ?? Key words: cotton, knitted, garment, men
 
@@ -32,7 +32,7 @@ Description: Electric motor-driven centrifugal pump for water circulation
 
 ?? 5?? Chemicals
 Product Name: Sodium Hypochlorite Solution
-Description: Industrial-grade bleaching chemical solution (10–15% concentration)
+Description: Industrial-grade bleaching chemical solution (10ï¿½15% concentration)
 ?? Key words: chemical compound, disinfectant
 
 ?? 6?? Plastic Products
@@ -45,3 +45,36 @@ Product Name: Stainless Steel Kitchen Knife
 Description: Stainless steel blade kitchen knife with plastic handle
 ?? Key words: cutlery, stainless steel
 
+route analysis output
+
+{
+  "name": "Mumbai Factory â†’ JNPT Nhava Sheva â†’ Port of New York â†’ US Inland Warehouse",
+  "total_days": 35,
+  "total_cost_inr": 248500.0,
+  "sequence": [
+    {
+      "description": "Pickup from Mumbai factory and transport to JNPT (Nhava Sheva) port terminal",
+      "mode": "truck",
+      "duration_hours": 12
+    },
+    {
+      "description": "Export customs clearance (CHA), cargo inspection, and port terminal handling",
+      "mode": "truck",
+      "duration_hours": 48
+    },
+    {
+      "description": "Ocean freight transit from JNPT to Port of New York/New Jersey via direct sailing",
+      "mode": "sea",
+      "duration_hours": 744
+    },
+    {
+      "description": "US Customs entry, port deconsolidation, and final truck delivery to warehouse",
+      "mode": "truck",
+      "duration_hours": 36
+    }
+  ],
+  "why_best_for_beginners": "The Nhava Sheva to New York sea corridor is the most established route for Indian apparel, offering frequent sailings, predictable 2026 costs, and simplified documentation for first-time exporters."
+}
+
+hs classifier utput
+{"hs_code": "68022110", "product_desc": "Polished Makrana white marble blocks and tiles"}

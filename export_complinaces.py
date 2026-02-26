@@ -137,9 +137,9 @@ COUNTRY_COMPLIANCE_PROMPT = """
 
 def get_country_wise_compliances(hs_code, country, product_name, product_desc):
     
-
-    # api_key = os.getenv("GEMINI_API_KEY")
-    api_key="AIzaSyD7TeAVbKHOpJsNURIc64H8VBX0pFQGF6s"
+    load_dotenv
+    api_key = os.getenv("GEMINI_API_KEY")
+    
     if not api_key:
         raise ValueError("Missing GEMINI_API_KEY environment variable")
 
@@ -161,8 +161,8 @@ def get_country_wise_compliances(hs_code, country, product_name, product_desc):
     return ComplianceResponse(**cleaned).model_dump(mode="json")
 
 
-#function call
-# country = st.text_input("Destination Country (e.g. USA, Germany, UAE, UK)")
+# function call
+
 
 # if st.button("Check Full Export Compliance"):
 #     with st.spinner("Analyzing Indian + Import Country Regulations..."):

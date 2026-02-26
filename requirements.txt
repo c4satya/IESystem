@@ -1,5 +1,6 @@
 # streamlit run app.py
-# run virtual env: >vnev\Scripts\activate.bat  
+# python -m venv venv 
+# run virtual env: venv\Scripts\activate.bat     
 
 
 scikit-learn

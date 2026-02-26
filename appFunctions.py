@@ -29,7 +29,7 @@ from typing import Tuple, Optional
 
 load_dotenv()
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-# GEMINI_API_KEY=os.getenv("GEMINI_API_KEY")
+GEMINI_API_KEY=os.getenv("GEMINI_API_KEY")
 retriever = HSCodeRetriever(PINECONE_API_KEY+"","pdf-embeddings-768")
 
 
@@ -67,7 +67,7 @@ def generate_pdf(product_name, product_desc, country, qty, unit_type, hs, compli
     buffer.seek(0)
     return buffer.getvalue()
 
-# HS-CODE CLASSIFIER
+
 
 
 

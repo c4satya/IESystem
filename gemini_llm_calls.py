@@ -4,18 +4,12 @@ import os
 import re
 import json
 from Embeding import *
-
-# load_dotenv()
-
-# GEMINI_API_KEY = "AIzaSyD7TeAVbKHOpJsNURIc64H8VBX0pFQGF6s"
-
-
-
-# Configure Gemini
+load_dotenv()
+GEMINI_API_KEY=os.getenv("GEMINI_API_KEY")
 
 
 def get_best_hs_code(user_query: str, vector_results):
-   GEMINI_API_KEY = "AIzaSyD7TeAVbKHOpJsNURIc64H8VBX0pFQGF6s"
+  
    genai.configure(api_key=GEMINI_API_KEY)
    
    formatted_chunks = []
